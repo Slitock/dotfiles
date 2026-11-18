@@ -103,6 +103,12 @@ env FISH_NO_TMUX=1 fish
 Один нюанс: `config/autostart/v2rayN.desktop` содержит абсолютный путь
 `/home/slitock/opt/vrayn/v2rayN`. На другой машине его нужно поправить.
 
+## Старое
+
+`hypr/` — конфиги Hyprland (декабрь 2025), оставлены в истории для справки,
+сейчас не используются. Актуальный сетап живёт в `config/` и работает на
+niri + DankMaterialShell.
+
 ## Благодарности
 
 Структура и идеи по tmux/fish подсмотрены в [l-m-n-d-k/dotfiles](https://github.com/l-m-n-d-k/dotfiles),
