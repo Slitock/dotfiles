@@ -1,0 +1,205 @@
+#!/usr/bin/env python3
+"""Генерирует цвета tmux, starship и fish из палитры DMS (Material You).
+
+DMS переписывает ~/.config/kitty/dank-theme.conf при каждой смене обоев.
+Скрипт читает эту палитру, достраивает производные роли (surface, muted, border)
+и рендерит шаблоны из ~/.config/dank-term/templates в целевые конфиги.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import os
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+CONFIG = Path.home() / ".config"
+CACHE = Path.home() / ".cache" / "dank-term"
+
+PALETTES = (
+    CONFIG / "kitty" / "dank-theme.conf",
+    CONFIG / "alacritty" / "dank-theme.toml",
+)
+
+TEMPLATE_DIR = CONFIG / "dank-term" / "templates"
+
+TARGETS = (
+    ("tmux-theme.conf", CONFIG / "tmux" / "theme.conf"),
+    ("starship.toml", CONFIG / "starship.toml"),
+    ("fish-colors.fish", CONFIG / "fish" / "conf.d" / "dank-palette.fish"),
+)
+
+HEX = re.compile(r"#[0-9a-fA-F]{6}")
+PLACEHOLDER = re.compile(r"\{\{\s*(\w+)\s*\}\}")
+
+
+def read_kitty(path: Path) -> dict[str, str]:
+    """Палитра kitty: строки вида `color4 #94a0f1`."""
+    raw: dict[str, str] = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        parts = line.split()
+        if len(parts) == 2 and HEX.fullmatch(parts[1]):
+            raw[parts[0]] = parts[1]
+    return raw
+
+
+def read_alacritty(path: Path) -> dict[str, str]:
+    """Палитра alacritty: секции [colors.normal], [colors.primary] и т.д."""
+    section = ""
+    raw: dict[str, str] = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if line.startswith("[") and line.endswith("]"):
+            section = line.strip("[]")
+            continue
+        m = re.match(r"(\w+)\s*=\s*'?(#[0-9a-fA-F]{6})'?", line)
+        if not m:
+            continue
+        name, value = m.groups()
+        if section == "colors.normal":
+            raw[name] = value
+        elif section == "colors.bright":
+            raw[f"bright_{name}"] = value
+        elif section in {"colors.primary", "colors.selection", "colors.cursor"}:
+            raw[f"{section.split('.')[1]}_{name}"] = value
+    return raw
+
+
+def semantic(raw: dict[str, str]) -> dict[str, str]:
+    """Приводит сырые ключи kitty/alacritty к именам ANSI-ролей."""
+    def pick(*keys: str) -> str:
+        for key in keys:
+            if key in raw:
+                return raw[key]
+        raise KeyError(keys[0])
+
+    roles = {
+        "bg": pick("background", "primary_background"),
+        "fg": pick("foreground", "primary_foreground"),
+        "cursor": pick("cursor", "cursor_cursor", "foreground"),
+        "selection": pick("selection_background", "selection_background"),
+        "red": pick("color1", "red"),
+        "green": pick("color2", "green"),
+        "yellow": pick("color3", "yellow"),
+        "blue": pick("color4", "blue"),
+        "magenta": pick("color5", "magenta"),
+        "cyan": pick("color6", "cyan"),
+        "white": pick("color7", "white"),
+        "grey": pick("color8", "bright_black"),
+        "red_bright": pick("color9", "bright_red"),
+        "green_bright": pick("color10", "bright_green"),
+        "yellow_bright": pick("color11", "bright_yellow"),
+        "blue_bright": pick("color12", "bright_blue"),
+        "magenta_bright": pick("color13", "bright_magenta"),
+        "cyan_bright": pick("color14", "bright_cyan"),
+        "white_bright": pick("color15", "bright_white"),
+    }
+    return roles
+
+
+def mix(a: str, b: str, t: float) -> str:
+    """Линейно смешивает два hex-цвета: t=0 → a, t=1 → b."""
+    ca = [int(a[i : i + 2], 16) for i in (1, 3, 5)]
+    cb = [int(b[i : i + 2], 16) for i in (1, 3, 5)]
+    return "#" + "".join(f"{round(x + (y - x) * t):02x}" for x, y in zip(ca, cb))
+
+
+def derive(roles: dict[str, str]) -> dict[str, str]:
+    """Достраивает поверхности и приглушённые тона из базовой палитры."""
+    bg, fg = roles["bg"], roles["fg"]
+    return {
+        **roles,
+        "surface": mix(bg, fg, 0.045),
+        "surface_alt": mix(bg, fg, 0.09),
+        "border": mix(bg, fg, 0.15),
+        "muted": mix(fg, bg, 0.45),
+        "accent": roles["cyan"],
+        "accent2": roles["blue"],
+        "on_accent": bg,
+    }
+
+
+def render(template: str, values: dict[str, str]) -> str:
+    def sub(match: re.Match[str]) -> str:
+        key = match.group(1)
+        if key not in values:
+            raise SystemExit(f"dank-term-theme: нет цвета для плейсхолдера {{{{{key}}}}}")
+        return values[key]
+
+    return PLACEHOLDER.sub(sub, template)
+
+
+def load_palette() -> tuple[Path, dict[str, str]]:
+    for path in PALETTES:
+        if not path.exists():
+            continue
+        raw = read_kitty(path) if path.name.endswith(".conf") else read_alacritty(path)
+        if not raw:
+            continue
+        try:
+            return path, derive(semantic(raw))
+        except KeyError as missing:
+            raise SystemExit(
+                f"dank-term-theme: в {path} нет цвета {missing.args[0]}.\n"
+                "Перегенерируй тему: dms matugen generate"
+            ) from None
+    raise SystemExit(
+        "dank-term-theme: не найдена палитра DMS.\n"
+        f"Ожидался один из файлов: {', '.join(map(str, PALETTES))}"
+    )
+
+
+def write_if_changed(path: Path, content: str) -> bool:
+    if path.exists() and path.read_text(encoding="utf-8") == content:
+        return False
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content, encoding="utf-8")
+    return True
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--quiet", action="store_true", help="не печатать отчёт")
+    parser.add_argument("--force", action="store_true", help="перерендерить даже при той же палитре")
+    parser.add_argument("--reload-tmux", action="store_true", help="подхватить цвета в запущенном tmux")
+    args = parser.parse_args()
+
+    source, colors = load_palette()
+    digest = hashlib.sha256(source.read_bytes()).hexdigest()
+    stamp = CACHE / "palette.sha256"
+    CACHE.mkdir(parents=True, exist_ok=True)
+
+    outputs_missing = any(not out.exists() for _, out in TARGETS)
+    palette_changed = not stamp.exists() or stamp.read_text(encoding="utf-8").strip() != digest
+    if not (palette_changed or outputs_missing or args.force):
+        return 0
+
+    changed: list[str] = []
+    for name, out in TARGETS:
+        template = (TEMPLATE_DIR / name).read_text(encoding="utf-8")
+        if write_if_changed(out, render(template, colors)):
+            changed.append(str(out))
+
+    stamp.write_text(digest + "\n", encoding="utf-8")
+
+    if changed and args.reload_tmux and os.environ.get("TMUX"):
+        subprocess.run(
+            ["tmux", "source-file", str(CONFIG / "tmux" / "theme.conf")],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=False,
+        )
+
+    if not args.quiet:
+        origin = f"палитра {source.name}" if palette_changed else "--force"
+        print(f"dank-term-theme: {origin}, обновлено файлов: {len(changed)}")
+        for path in changed:
+            print(f"  {path}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

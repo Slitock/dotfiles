@@ -1,0 +1,33 @@
+{
+  "dankKDEConnect": {
+    "enabled": false
+  },
+  "calculator": {
+    "enabled": true,
+    "noTrigger": true,
+    "trigger": ""
+  },
+  "dankPomodoroTimer": {
+    "enabled": true,
+    "workDuration": "60",
+    "shortBreakDuration": "5",
+    "longBreakDuration": "20",
+    "breakSequence": "S,S",
+    "autoStartBreaks": true,
+    "autoStartPomodoros": true,
+    "showBarText": true,
+    "playCompletionSound": true,
+    "lofiDirectory": "~/media/Music/lofi",
+    "completionSound": "/usr/share/sounds/speech-dispatcher/electric-piano-3.wav"
+  },
+  "lofiBar": {
+    "enabled": true
+  },
+  "undefined": {
+    "completionSound": "/usr/share/sounds/Pop/stereo/notification/complete.oga"
+  },
+  "lidAwake": {
+    "enabled": true,
+    "isEnabled": false
+  }
+}

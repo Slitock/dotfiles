@@ -1,0 +1,26 @@
+# Сгенерированное и личное — не коммитим.
+# Всё это создаётся DMS/matugen или самим dank-term-theme.
+
+# Тема терминала: палитра DMS → шаблоны
+config/starship.toml
+config/tmux/theme.conf
+config/fish/conf.d/dank-palette.fish
+
+# состояние шелла и плагинов
+config/fish/fish_variables
+config/yazi/plugins/
+config/nvim/colors/dms.lua
+
+# генерируемые темы и файлы DMS
+config/ghostty/themes/
+config/btop/themes/
+config/nvim/lua/lualine/themes/dms.lua
+
+# niri: DMS перегенерирует всё, кроме своих биндов
+config/niri/dms/*.kdl
+!config/niri/dms/binds.kdl
+
+# резервные копии
+*.bak
+*.bak-*
+*.bak.*
