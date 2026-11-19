@@ -30,13 +30,10 @@ type -q starship; and starship init fish | source
 # ── Умный cd ─────────────────────────────────────────────────
 type -q zoxide; and zoxide init fish | source
 
-# ── Сокращения ───────────────────────────────────────────────
-abbr -a ls 'eza --icons --group-directories-first'
-abbr -a ll 'eza -lh --icons --group-directories-first --git'
-abbr -a la 'eza -lah --icons --group-directories-first --git'
-abbr -a lt 'eza --tree --level=2 --icons --group-directories-first'
-abbr -a cat 'bat --style=plain --paging=never'
-abbr -a ff 'fzf --height=60% --preview "bat --color=always --style=numbers --line-range=:200 {}"'
+# ── Обёртки над eza/bat/fzf ──────────────────────────────────
+# Живут в functions/*.fish: ввод остаётся коротким (`ls`), подмена — при
+# выполнении. Аббревиатуры для этого не годятся: они раскрываются в строке.
+# Файлы: ls.fish, ll.fish, la.fish, lt.fish, cat.fish, ff.fish
 
 abbr -a gs 'git status --short --branch'
 abbr -a gd 'git diff'

@@ -10,7 +10,7 @@
 
 | каталог | куда ставится | что это |
 |---|---|---|
-| `config/fish` | `~/.config/fish` | шелл: автозапуск tmux, starship, zoxide, сокращения |
+| `config/fish` | `~/.config/fish` | шелл: автозапуск tmux, starship, zoxide, обёртки `ls`→eza, `cat`→bat, сокращения git |
 | `config/tmux` | `~/.config/tmux` | сплиты в текущей папке, статус-бар на палитре DMS |
 | `config/dank-term` | `~/.config/dank-term` | шаблоны цветов + `dank-term-theme` (генератор) |
 | `config/ghostty` | `~/.config/ghostty` | терминал |
