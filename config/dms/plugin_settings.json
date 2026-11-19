@@ -9,10 +9,10 @@
   },
   "dankPomodoroTimer": {
     "enabled": true,
-    "workDuration": "60",
+    "workDuration": "45",
     "shortBreakDuration": "5",
     "longBreakDuration": "20",
-    "breakSequence": "S,S",
+    "breakSequence": "S,S,L",
     "autoStartBreaks": true,
     "autoStartPomodoros": true,
     "showBarText": true,
@@ -28,6 +28,114 @@
   },
   "lidAwake": {
     "enabled": true,
-    "isEnabled": false
+    "isEnabled": true
+  },
+  "diceCoin": {
+    "enabled": true,
+    "lastCoin": {
+      "kind": "coin",
+      "result": "heads",
+      "ts": 1795062108920
+    },
+    "history": [
+      {
+        "kind": "coin",
+        "result": "heads",
+        "ts": 1795062108920
+      },
+      {
+        "kind": "coin",
+        "result": "tails",
+        "ts": 1795062101209
+      },
+      {
+        "kind": "coin",
+        "result": "tails",
+        "ts": 1795062099429
+      },
+      {
+        "kind": "coin",
+        "result": "heads",
+        "ts": 1795062094833
+      },
+      {
+        "kind": "dice",
+        "sides": 4,
+        "values": [
+          4
+        ],
+        "total": 4,
+        "ts": 1795036931182
+      },
+      {
+        "kind": "coin",
+        "result": "heads",
+        "ts": 1795036924832
+      },
+      {
+        "kind": "dice",
+        "sides": 20,
+        "values": [
+          18
+        ],
+        "total": 18,
+        "ts": 1795036923336
+      },
+      {
+        "kind": "dice",
+        "sides": 100,
+        "values": [
+          20
+        ],
+        "total": 20,
+        "ts": 1795036920064
+      },
+      {
+        "kind": "dice",
+        "sides": 8,
+        "values": [
+          2
+        ],
+        "total": 2,
+        "ts": 1795036916676
+      },
+      {
+        "kind": "dice",
+        "sides": 12,
+        "values": [
+          7
+        ],
+        "total": 7,
+        "ts": 1795036682641
+      },
+      {
+        "kind": "dice",
+        "sides": 4,
+        "values": [
+          4
+        ],
+        "total": 4,
+        "ts": 1795036679735
+      },
+      {
+        "kind": "dice",
+        "sides": 6,
+        "values": [
+          1
+        ],
+        "total": 1,
+        "ts": 1795036677376
+      }
+    ],
+    "dieSides": 4,
+    "lastDice": {
+      "kind": "dice",
+      "sides": 4,
+      "values": [
+        4
+      ],
+      "total": 4,
+      "ts": 1795036931182
+    }
   }
 }

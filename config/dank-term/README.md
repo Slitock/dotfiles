@@ -37,9 +37,9 @@
 | автозапуск tmux, сокращения | `~/.config/fish/config.fish` |
 
 Доступные плейсхолдеры: `bg`, `fg`, `surface`, `surface_alt`, `border`, `muted`,
-`accent` (= cyan), `accent2` (= blue), `on_accent`, `selection`, `cursor`,
-`red`, `green`, `yellow`, `blue`, `magenta`, `cyan`, `white`, `grey`
-и `*_bright`-варианты.
+`faint` (серый для автодополнения), `accent` (= cyan), `accent2` (= blue),
+`on_accent`, `selection`, `cursor`, `red`, `green`, `yellow`, `blue`, `magenta`,
+`cyan`, `white`, `grey` и `*_bright`-варианты.
 
 После правки шаблона:
 

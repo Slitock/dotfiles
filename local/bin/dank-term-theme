@@ -116,6 +116,7 @@ def derive(roles: dict[str, str]) -> dict[str, str]:
         "surface_alt": mix(bg, fg, 0.09),
         "border": mix(bg, fg, 0.15),
         "muted": mix(fg, bg, 0.45),
+        "faint": mix(fg, bg, 0.55),   # автодополнение: серый, но читаемый на фоне
         "accent": roles["cyan"],
         "accent2": roles["blue"],
         "on_accent": bg,
