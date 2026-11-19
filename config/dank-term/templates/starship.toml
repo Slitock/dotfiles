@@ -38,7 +38,7 @@ vimcmd_symbol = "[❮](bold fg:green)"
 
 [directory]
 style = "fg:accent"
-format = "[ \ue5ff $path]($style)"
+format = "[ $path]($style)"
 truncation_length = 4
 truncation_symbol = "…/"
 
